@@ -6,6 +6,8 @@ export default function InsertMatchPage() {
   const [arenas, setArenas] = useState([]);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [selectedLoadout, setSelectedLoadout] = useState(null);
+  const [specializations, setSpecializations] = useState([]);
+  const [selectedSpecialization, setSelectedSpecialization] = useState(null);
 
   const [formData, setFormData] = useState({
     primary_weapon_name: "",
@@ -41,10 +43,21 @@ export default function InsertMatchPage() {
       .catch(() => setMessage("Failed to load arenas"));
   }, []);
 
-  const handleCharacterChange = (e) => {
+  const handleCharacterChange = async (e) => {
     const char = characters.find((c) => c.name === e.target.value);
     setSelectedCharacter(char);
     setSelectedLoadout(null);
+    setSelectedSpecialization(null);
+
+    // Fetch specializations for this character
+    try {
+      const res = await fetch(`/api/specializations?characterId=${char.id}`);
+      const data = await res.json();
+      setSpecializations(data);
+    } catch {
+      setSpecializations([]);
+      setMessage("Failed to load specializations");
+    }
   };
 
   const handleLoadoutChange = (e) => {
@@ -98,8 +111,7 @@ export default function InsertMatchPage() {
           onChange={handleCharacterChange}
           className="select select-bordered w-full"
           defaultValue=""
-          required
-        >
+          required>
           <option value="" disabled>
             Select Character
           </option>
@@ -116,14 +128,37 @@ export default function InsertMatchPage() {
             onChange={handleLoadoutChange}
             className="select select-bordered w-full"
             defaultValue=""
-            required
-          >
+            required>
             <option value="" disabled>
               Select Loadout
             </option>
             {selectedCharacter.loadouts.map((l) => (
               <option key={l.id} value={l.loadout_name}>
                 {l.loadout_name}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Specializations */}
+        {selectedCharacter && specializations.length > 0 && (
+          <select
+            onChange={(e) => {
+              const spec = specializations.find(
+                (s) => s.specialization_name === e.target.value
+              );
+              setSelectedSpecialization(spec);
+              setFormData({ ...formData, specialization_name: e.target.value });
+            }}
+            className="select select-bordered w-full"
+            defaultValue=""
+            required>
+            <option value="" disabled>
+              Select Specialization
+            </option>
+            {specializations.map((s) => (
+              <option key={s.id} value={s.specialization_name}>
+                {s.specialization_name}
               </option>
             ))}
           </select>
@@ -149,14 +184,14 @@ export default function InsertMatchPage() {
           onChange={handleChange}
           className="input input-bordered w-full"
         />
-        <input
+        {/* <input
           name="specialization_name"
           placeholder="Specialization"
           value={formData.specialization_name}
           onChange={handleChange}
           className="input input-bordered w-full"
           required
-        />
+        /> */}
 
         <label className="flex items-center gap-2">
           <input
@@ -195,9 +230,9 @@ export default function InsertMatchPage() {
                     isSelected
                       ? "bg-[var(--accent)] text-white border-transparent hover:bg-[var(--accent-hover)]"
                       : "bg-[var(--card-bg)] text-[var(--foreground)] border-[var(--border-color)] hover:border-[var(--accent)] hover:bg-[var(--background)]"
-                  }`}
-                >
-                  {option.label} <span className="text-muted">({option.points} pts)</span>
+                  }`}>
+                  {option.label}{" "}
+                  <span className="text-muted">({option.points} pts)</span>
                 </button>
               );
             })}
@@ -249,8 +284,7 @@ export default function InsertMatchPage() {
           value={formData.arena_id}
           onChange={handleChange}
           className="input input-bordered w-full"
-          required
-        >
+          required>
           <option value="">Select an arena</option>
           {arenas.map((arena) => (
             <option key={arena.id} value={arena.id}>
