@@ -32,12 +32,12 @@ export async function POST(req) {
       assists,
       deaths,
       revives,
-      arena_name,
+      arena_id, // <-- frontend now sends arena_id
       sub_gamemode_name,
       specialization_name,
-      damage,     
-      support,     
-      objective,   
+      damage,
+      support,
+      objective,
     } = body;
 
     // 1️⃣ Character lookup
@@ -59,14 +59,14 @@ export async function POST(req) {
         `Loadout "${loadout_name}" not found for character "${character_name}"`
       );
 
-    // 3️⃣ Arena lookup (optional)
+    // 3️⃣ Arena lookup (optional) — simplified
     let arenaId = null;
-    if (arena_name && arena_name.trim() !== "") {
-      const arena = await prisma.arenas.findFirst({
-        where: { arena_name: arena_name },
+    if (arena_id) {
+      const arena = await prisma.arenas.findUnique({
+        where: { id: parseInt(arena_id) },
       });
       if (!arena)
-        throw new Error(`Arena "${arena_name}" not found`);
+        throw new Error(`Arena with ID "${arena_id}" not found`);
       arenaId = arena.id;
     }
 
@@ -74,7 +74,7 @@ export async function POST(req) {
     let specializationId = null;
     if (specialization_name && specialization_name.trim() !== "") {
       const specialization = await prisma.specializations.findFirst({
-        where: { specialization_name: specialization_name },
+        where: { specialization_name },
       });
       if (!specialization)
         throw new Error(`Specialization "${specialization_name}" not found`);
@@ -109,7 +109,7 @@ export async function POST(req) {
       data: {
         character_id: character.id,
         loadout_id: loadout.id,
-        gamemode_id: 2, // World Tour, static for now
+        gamemode_id: 2, // World Tour, static
         sub_gamemode_id: null, // implement later if needed
         specialization_id: specializationId,
         won,
@@ -121,7 +121,7 @@ export async function POST(req) {
         damage_score: parseInt(damage) || 0,
         support_score: parseInt(support) || 0,
         objective_score: parseInt(objective) || 0,
-        arena_id: arenaId,
+        arena_id: arenaId, // <-- now comes from dropdown
         primary_weapon_id: primaryWeaponId,
       },
     });

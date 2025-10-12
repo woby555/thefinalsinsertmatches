@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 export default function InsertMatchPage() {
   const [characters, setCharacters] = useState([]);
+  const [arenas, setArenas] = useState([]);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [selectedLoadout, setSelectedLoadout] = useState(null);
 
@@ -15,11 +16,11 @@ export default function InsertMatchPage() {
     kills: 0,
     assists: 0,
     deaths: 0,
-    arena_name: "",
     revives: 0,
     damage: 0,
     support: 0,
     objective: 0,
+    arena_id: "", // <-- store selected arena ID
   });
 
   const [message, setMessage] = useState("");
@@ -30,6 +31,14 @@ export default function InsertMatchPage() {
       .then((res) => res.json())
       .then(setCharacters)
       .catch(() => setMessage("Failed to load characters"));
+  }, []);
+
+  // Fetch arenas
+  useEffect(() => {
+    fetch("/api/arenas")
+      .then((res) => res.json())
+      .then(setArenas)
+      .catch(() => setMessage("Failed to load arenas"));
   }, []);
 
   const handleCharacterChange = (e) => {
@@ -60,12 +69,6 @@ export default function InsertMatchPage() {
       return;
     }
 
-    console.log("Submitting payload:", {
-      ...formData,
-      character_name: selectedCharacter.name,
-      loadout_name: selectedLoadout.loadout_name,
-    });
-
     setMessage("Submitting...");
     try {
       const res = await fetch("/api/matches", {
@@ -95,7 +98,8 @@ export default function InsertMatchPage() {
           onChange={handleCharacterChange}
           className="select select-bordered w-full"
           defaultValue=""
-          required>
+          required
+        >
           <option value="" disabled>
             Select Character
           </option>
@@ -112,7 +116,8 @@ export default function InsertMatchPage() {
             onChange={handleLoadoutChange}
             className="select select-bordered w-full"
             defaultValue=""
-            required>
+            required
+          >
             <option value="" disabled>
               Select Loadout
             </option>
@@ -124,7 +129,7 @@ export default function InsertMatchPage() {
           </select>
         )}
 
-        {/* Primary Weapon as text input */}
+        {/* Primary Weapon */}
         {selectedLoadout && (
           <input
             name="primary_weapon_name"
@@ -163,6 +168,7 @@ export default function InsertMatchPage() {
           Won Match?
         </label>
 
+        {/* Tournament Placement */}
         <div className="mt-6">
           <label className="font-semibold mb-3 block text-lg">
             Tournament Placement
@@ -185,21 +191,20 @@ export default function InsertMatchPage() {
                       progression_points: option.points,
                     })
                   }
-                  className={`w-full rounded-lg px-4 py-2 text-sm font-medium border transition-all duration-150 
-            ${
-              isSelected
-                ? "bg-[var(--accent)] text-white border-transparent hover:bg-[var(--accent-hover)]"
-                : "bg-[var(--card-bg)] text-[var(--foreground)] border-[var(--border-color)] hover:border-[var(--accent)] hover:bg-[var(--background)]"
-            }
-          `}>
-                  {option.label}{" "}
-                  <span className="text-muted">({option.points} pts)</span>
+                  className={`w-full rounded-lg px-4 py-2 text-sm font-medium border transition-all duration-150 ${
+                    isSelected
+                      ? "bg-[var(--accent)] text-white border-transparent hover:bg-[var(--accent-hover)]"
+                      : "bg-[var(--card-bg)] text-[var(--foreground)] border-[var(--border-color)] hover:border-[var(--accent)] hover:bg-[var(--background)]"
+                  }`}
+                >
+                  {option.label} <span className="text-muted">({option.points} pts)</span>
                 </button>
               );
             })}
           </div>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-4 gap-2">
           <label className="col-span-4 font-semibold">Stats</label>
           <label className="text-center">Kills</label>
@@ -219,6 +224,7 @@ export default function InsertMatchPage() {
           ))}
         </div>
 
+        {/* Damage/Support/Objective */}
         <div className="grid grid-cols-3 gap-2">
           <label className="text-center">Damage</label>
           <label className="text-center">Support</label>
@@ -236,13 +242,22 @@ export default function InsertMatchPage() {
           ))}
         </div>
 
-        <input
-          name="arena_name"
-          placeholder="Arena Name"
-          value={formData.arena_name}
+        {/* Arena / Map dropdown */}
+        <label className="font-semibold">Arena / Map</label>
+        <select
+          name="arena_id"
+          value={formData.arena_id}
           onChange={handleChange}
           className="input input-bordered w-full"
-        />
+          required
+        >
+          <option value="">Select an arena</option>
+          {arenas.map((arena) => (
+            <option key={arena.id} value={arena.id}>
+              {arena.arena_name}
+            </option>
+          ))}
+        </select>
 
         <button type="submit" className="btn btn-primary w-full">
           Insert Match
