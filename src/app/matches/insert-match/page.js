@@ -146,10 +146,11 @@ export default function InsertMatchPage() {
         />
         <input
           name="specialization_name"
-          placeholder="Specialization (optional)"
+          placeholder="Specialization"
           value={formData.specialization_name}
           onChange={handleChange}
           className="input input-bordered w-full"
+          required
         />
 
         <label className="flex items-center gap-2">
@@ -162,15 +163,42 @@ export default function InsertMatchPage() {
           Won Match?
         </label>
 
-        <label className="font-semibold">Progression Points</label>
-        <input
-          type="number"
-          name="progression_points"
-          placeholder="Progression Points"
-          value={formData.progression_points}
-          onChange={handleChange}
-          className="input input-bordered w-full"
-        />
+        <div className="mt-6">
+          <label className="font-semibold mb-3 block text-lg">
+            Tournament Placement
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { label: "Knocked out of round 1", points: 2 },
+              { label: "Knocked out of round 2", points: 6 },
+              { label: "Lose final round", points: 14 },
+              { label: "Win final round", points: 25 },
+            ].map((option) => {
+              const isSelected = formData.progression_points === option.points;
+              return (
+                <button
+                  key={option.points}
+                  type="button"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      progression_points: option.points,
+                    })
+                  }
+                  className={`w-full rounded-lg px-4 py-2 text-sm font-medium border transition-all duration-150 
+            ${
+              isSelected
+                ? "bg-[var(--accent)] text-white border-transparent hover:bg-[var(--accent-hover)]"
+                : "bg-[var(--card-bg)] text-[var(--foreground)] border-[var(--border-color)] hover:border-[var(--accent)] hover:bg-[var(--background)]"
+            }
+          `}>
+                  {option.label}{" "}
+                  <span className="text-muted">({option.points} pts)</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="grid grid-cols-4 gap-2">
           <label className="col-span-4 font-semibold">Stats</label>
@@ -190,7 +218,6 @@ export default function InsertMatchPage() {
             />
           ))}
         </div>
-        
 
         <div className="grid grid-cols-3 gap-2">
           <label className="text-center">Damage</label>
