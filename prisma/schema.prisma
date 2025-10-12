@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model arenas {
+  id         Int       @id(map: "maps_pkey") @default(autoincrement())
+  arena_name String?
+  matches    matches[]
+}
+
+model characters {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  class_id Int
+  classes  classes    @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  loadouts loadouts[]
+  matches  matches[]
+}
+
+model class_equipments {
+  class_id     Int
+  equipment_id Int
+  classes      classes    @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  equipments   equipments @relation(fields: [equipment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([class_id, equipment_id])
+}
+
+model classes {
+  id               Int                @id @default(autoincrement())
+  class_name       String             @unique
+  description      String?
+  characters       characters[]
+  class_equipments class_equipments[]
+  specializations  specializations[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model equipments {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  equipment_type     String
+  description        String?
+  class_equipments   class_equipments[]
+  gadgets            gadgets?
+  loadout_equipments loadout_equipments[]
+  matches            matches[]
+  weapons            weapons?
+}
+
+model gadgets {
+  equipment_id Int        @id
+  equipments   equipments @relation(fields: [equipment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model gamemodes {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique
+  description  String?
+  matches      matches[]
+  subgamemodes subgamemodes[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model loadout_equipments {
+  loadout_id   Int
+  equipment_id Int
+  slot_number  Int
+  equipments   equipments @relation(fields: [equipment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  loadouts     loadouts   @relation(fields: [loadout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([loadout_id, slot_number])
+}
+
+model loadouts {
+  id                 Int                  @id @default(autoincrement())
+  character_id       Int
+  loadout_name       String?
+  loadout_equipments loadout_equipments[]
+  characters         characters           @relation(fields: [character_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  matches            matches[]
+
+  @@unique([character_id, loadout_name])
+}
+
+model matches {
+  id                 Int              @id @default(autoincrement())
+  character_id       Int
+  loadout_id         Int
+  gamemode_id        Int
+  sub_gamemode_id    Int?
+  specialization_id  Int?
+  match_date         DateTime?        @default(now()) @db.Timestamp(6)
+  won                Boolean
+  progression_points Int?             @default(0)
+  kills              Int?             @default(0)
+  assists            Int?             @default(0)
+  deaths             Int?             @default(0)
+  damage_score       Int?
+  support_score      Int?
+  objective_score    Int?
+  arena_id           Int?
+  revives            Int?
+  primary_weapon_id  Int?
+  subgamemodes       subgamemodes?    @relation(fields: [sub_gamemode_id, gamemode_id], references: [id, gamemode_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subgamemode_consistency")
+  characters         characters       @relation(fields: [character_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  gamemodes          gamemodes        @relation(fields: [gamemode_id], references: [id], onUpdate: NoAction)
+  loadouts           loadouts         @relation(fields: [loadout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  arenas             arenas?          @relation(fields: [arena_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "matches_map_id_fkey")
+  equipments         equipments?      @relation(fields: [primary_weapon_id], references: [id], onUpdate: NoAction)
+  specializations    specializations? @relation(fields: [specialization_id], references: [id], onUpdate: NoAction)
+}
+
+model specializations {
+  id                  Int       @id @default(autoincrement())
+  class_id            Int
+  specialization_name String
+  description         String
+  matches             matches[]
+  classes             classes   @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([class_id, specialization_name])
+}
+
+model subgamemodes {
+  id          Int       @default(autoincrement())
+  gamemode_id Int
+  name        String
+  description String?
+  matches     matches[]
+  gamemodes   gamemodes @relation(fields: [gamemode_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([id, gamemode_id])
+  @@unique([gamemode_id, name])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model weapons {
+  equipment_id Int        @id
+  weapon_type  String
+  equipments   equipments @relation(fields: [equipment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}

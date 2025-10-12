@@ -1,8 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light mode colors */
+  --background: #f9fafb; /* soft gray */
+  --foreground: #1f2937; /* slate-800 */
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb; /* gray-200 */
+  --accent: #2563eb; /* blue-600 */
+  --accent-hover: #1e40af; /* blue-800 */
+  --muted-text: #6b7280; /* gray-500 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111827; /* gray-900 */
+    --foreground: #f3f4f6; /* gray-100 */
+    --card-bg: #1f2937; /* gray-800 */
+    --border-color: #374151; /* gray-700 */
+    --accent: #3b82f6; /* blue-500 */
+    --accent-hover: #60a5fa; /* blue-400 */
+    --muted-text: #9ca3af; /* gray-400 */
+  }
 }
 
 @theme inline {
@@ -12,15 +30,58 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-body {
-  background: var(--background);
+/* Cards and Containers */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--accent);
+  color: white;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Inputs */
+input, select, textarea {
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--card-bg);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* Subtle muted text (for labels, descriptions, etc.) */
+.text-muted {
+  color: var(--muted-text);
+}
+
+/* Smooth transitions between modes */
+* {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
