@@ -16,6 +16,10 @@ export default function InsertMatchPage() {
     assists: 0,
     deaths: 0,
     arena_name: "",
+    revives: 0,
+    damage: 0,
+    support: 0,
+    objective: 0,
   });
 
   const [message, setMessage] = useState("");
@@ -57,10 +61,10 @@ export default function InsertMatchPage() {
     }
 
     console.log("Submitting payload:", {
-  ...formData,
-  character_name: selectedCharacter.name,
-  loadout_name: selectedLoadout.loadout_name,
-});
+      ...formData,
+      character_name: selectedCharacter.name,
+      loadout_name: selectedLoadout.loadout_name,
+    });
 
     setMessage("Submitting...");
     try {
@@ -83,7 +87,7 @@ export default function InsertMatchPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 border rounded-lg shadow">
+    <div className="max-w-2xl mx-auto mt-10 p-6 border rounded-lg shadow">
       <h1 className="text-2xl font-bold mb-4">Insert Match (World Tour)</h1>
       <form onSubmit={handleSubmit} className="space-y-3">
         {/* Character */}
@@ -91,8 +95,7 @@ export default function InsertMatchPage() {
           onChange={handleCharacterChange}
           className="select select-bordered w-full"
           defaultValue=""
-          required
-        >
+          required>
           <option value="" disabled>
             Select Character
           </option>
@@ -109,8 +112,7 @@ export default function InsertMatchPage() {
             onChange={handleLoadoutChange}
             className="select select-bordered w-full"
             defaultValue=""
-            required
-          >
+            required>
             <option value="" disabled>
               Select Loadout
             </option>
@@ -170,9 +172,31 @@ export default function InsertMatchPage() {
           className="input input-bordered w-full"
         />
 
+        <div className="grid grid-cols-4 gap-2">
+          <label className="col-span-4 font-semibold">Stats</label>
+          <label className="text-center">Kills</label>
+          <label className="text-center">Assists</label>
+          <label className="text-center">Deaths</label>
+          <label className="text-center">Revives</label>
+          {["kills", "assists", "deaths", "revives"].map((field) => (
+            <input
+              key={field}
+              type="number"
+              name={field}
+              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+              value={formData[field]}
+              onChange={handleChange}
+              className="input input-bordered w-full"
+            />
+          ))}
+        </div>
+        
+
         <div className="grid grid-cols-3 gap-2">
-          <label className="col-span-3 font-semibold">Stats</label>
-          {["kills", "assists", "deaths"].map((field) => (
+          <label className="text-center">Damage</label>
+          <label className="text-center">Support</label>
+          <label className="text-center">Objective</label>
+          {["damage", "support", "objective"].map((field) => (
             <input
               key={field}
               type="number"

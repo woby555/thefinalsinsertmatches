@@ -31,9 +31,13 @@ export async function POST(req) {
       kills,
       assists,
       deaths,
+      revives,
       arena_name,
       sub_gamemode_name,
       specialization_name,
+      damage,     
+      support,     
+      objective,   
     } = body;
 
     // 1️⃣ Character lookup
@@ -55,16 +59,37 @@ export async function POST(req) {
         `Loadout "${loadout_name}" not found for character "${character_name}"`
       );
 
-    // 3️⃣ Primary weapon validation (optional)
+    // 3️⃣ Arena lookup (optional)
+    let arenaId = null;
+    if (arena_name && arena_name.trim() !== "") {
+      const arena = await prisma.arenas.findFirst({
+        where: { arena_name: arena_name },
+      });
+      if (!arena)
+        throw new Error(`Arena "${arena_name}" not found`);
+      arenaId = arena.id;
+    }
+
+    // 4️⃣ Specialization lookup (optional)
+    let specializationId = null;
+    if (specialization_name && specialization_name.trim() !== "") {
+      const specialization = await prisma.specializations.findFirst({
+        where: { specialization_name: specialization_name },
+      });
+      if (!specialization)
+        throw new Error(`Specialization "${specialization_name}" not found`);
+      specializationId = specialization.id;
+    }
+
+    // 5️⃣ Primary weapon validation (optional)
+    let primaryWeaponId = null;
     if (primary_weapon_name) {
-      // find the weapon by name and type
       const weapon = await prisma.equipments.findFirst({
         where: { name: primary_weapon_name, equipment_type: "weapon" },
       });
       if (!weapon)
         throw new Error(`Weapon "${primary_weapon_name}" not found`);
 
-      // check if the weapon exists in the loadout
       const weaponExists = await prisma.loadout_equipments.findFirst({
         where: {
           loadout_id: loadout.id,
@@ -73,27 +98,31 @@ export async function POST(req) {
       });
       if (!weaponExists)
         throw new Error(
-          `Weapon "${primary_weapon_name}" not found in loadout "${loadout_name}" for character "${character_name}"`
+          `Weapon "${primary_weapon_name}" not found in loadout "${loadout_name}" for "${character_name}"`
         );
+
+      primaryWeaponId = weapon.id;
     }
 
-    // 4️⃣ Insert match
+    // 6️⃣ Create the match record
     const match = await prisma.matches.create({
       data: {
         character_id: character.id,
         loadout_id: loadout.id,
-        gamemode_id: 2, // World Tour
-        sub_gamemode_id: null, // optional, adjust if you implement sub-gamemode
-        specialization_id: null, // optional
+        gamemode_id: 2, // World Tour, static for now
+        sub_gamemode_id: null, // implement later if needed
+        specialization_id: specializationId,
         won,
         progression_points: parseInt(progression_points) || 0,
         kills: parseInt(kills) || 0,
         assists: parseInt(assists) || 0,
         deaths: parseInt(deaths) || 0,
-        arena_id: null, // optional, you can resolve arena_name here if needed
-        primary_weapon_id: primary_weapon_name
-          ? (await prisma.equipments.findFirst({ where: { name: primary_weapon_name } })).id
-          : null,
+        revives: parseInt(revives) || 0,
+        damage_score: parseInt(damage) || 0,
+        support_score: parseInt(support) || 0,
+        objective_score: parseInt(objective) || 0,
+        arena_id: arenaId,
+        primary_weapon_id: primaryWeaponId,
       },
     });
 
