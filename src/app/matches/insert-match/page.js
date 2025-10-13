@@ -82,6 +82,10 @@ export default function InsertMatchPage() {
       setMessage("Please select a character and a loadout.");
       return;
     }
+    if (formData.progression_points === null || formData.progression_points === undefined) {
+    setMessage("Please select a tournament placement.");
+    return;
+  }
 
     setMessage("Submitting...");
     try {
