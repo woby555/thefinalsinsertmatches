@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import MatchHistory from "../../components/MatchHistory";
 
 export default function InsertMatchPage() {
   const [characters, setCharacters] = useState([]);
@@ -103,88 +104,98 @@ export default function InsertMatchPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 border rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-4">Insert Match (World Tour)</h1>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        {/* Character */}
-        <select
-          onChange={handleCharacterChange}
-          className="select select-bordered w-full"
-          defaultValue=""
-          required>
-          <option value="" disabled>
-            Select Character
-          </option>
-          {characters.map((c) => (
-            <option key={c.id} value={c.name}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+    <div className="max-w-7xl mx-auto mt-10 p-4">
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        World Tour Matches
+      </h1>
 
-        {/* Loadout */}
-        {selectedCharacter && (
-          <select
-            onChange={handleLoadoutChange}
-            className="select select-bordered w-full"
-            defaultValue=""
-            required>
-            <option value="" disabled>
-              Select Loadout
-            </option>
-            {selectedCharacter.loadouts.map((l) => (
-              <option key={l.id} value={l.loadout_name}>
-                {l.loadout_name}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left column: Insert Match Form */}
+        <div className="w-full lg:w-1/3 p-6 border rounded-lg shadow bg-[var(--card-bg)]">
+          <h2 className="text-xl font-semibold mb-4">Insert Match</h2>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Character */}
+            <select
+              onChange={handleCharacterChange}
+              className="select select-bordered w-full"
+              defaultValue=""
+              required>
+              <option value="" disabled>
+                Select Character
               </option>
-            ))}
-          </select>
-        )}
+              {characters.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
 
-        {/* Specializations */}
-        {selectedCharacter && specializations.length > 0 && (
-          <select
-            onChange={(e) => {
-              const spec = specializations.find(
-                (s) => s.specialization_name === e.target.value
-              );
-              setSelectedSpecialization(spec);
-              setFormData({ ...formData, specialization_name: e.target.value });
-            }}
-            className="select select-bordered w-full"
-            defaultValue=""
-            required>
-            <option value="" disabled>
-              Select Specialization
-            </option>
-            {specializations.map((s) => (
-              <option key={s.id} value={s.specialization_name}>
-                {s.specialization_name}
-              </option>
-            ))}
-          </select>
-        )}
+            {/* Loadout */}
+            {selectedCharacter && (
+              <select
+                onChange={handleLoadoutChange}
+                className="select select-bordered w-full"
+                defaultValue=""
+                required>
+                <option value="" disabled>
+                  Select Loadout
+                </option>
+                {selectedCharacter.loadouts.map((l) => (
+                  <option key={l.id} value={l.loadout_name}>
+                    {l.loadout_name}
+                  </option>
+                ))}
+              </select>
+            )}
 
-        {/* Primary Weapon */}
-        {selectedLoadout && (
-          <input
-            name="primary_weapon_name"
-            placeholder="Primary Weapon Name"
-            value={formData.primary_weapon_name}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-            required
-          />
-        )}
+            {/* Specializations */}
+            {selectedCharacter && specializations.length > 0 && (
+              <select
+                onChange={(e) => {
+                  const spec = specializations.find(
+                    (s) => s.specialization_name === e.target.value
+                  );
+                  setSelectedSpecialization(spec);
+                  setFormData({
+                    ...formData,
+                    specialization_name: e.target.value,
+                  });
+                }}
+                className="select select-bordered w-full"
+                defaultValue=""
+                required>
+                <option value="" disabled>
+                  Select Specialization
+                </option>
+                {specializations.map((s) => (
+                  <option key={s.id} value={s.specialization_name}>
+                    {s.specialization_name}
+                  </option>
+                ))}
+              </select>
+            )}
 
-        {/* Other fields */}
-        <input
-          name="sub_gamemode_name"
-          placeholder="Sub-Gamemode (optional)"
-          value={formData.sub_gamemode_name}
-          onChange={handleChange}
-          className="input input-bordered w-full"
-        />
-        {/* <input
+            {/* Primary Weapon */}
+            {selectedLoadout && (
+              <input
+                name="primary_weapon_name"
+                placeholder="Primary Weapon Name"
+                value={formData.primary_weapon_name}
+                onChange={handleChange}
+                className="input input-bordered w-full"
+                required
+              />
+            )}
+
+            {/* Other fields */}
+            <input
+              name="sub_gamemode_name"
+              placeholder="Sub-Gamemode (optional)"
+              value={formData.sub_gamemode_name}
+              onChange={handleChange}
+              className="input input-bordered w-full"
+            />
+            {/* <input
           name="specialization_name"
           placeholder="Specialization"
           value={formData.specialization_name}
@@ -193,112 +204,119 @@ export default function InsertMatchPage() {
           required
         /> */}
 
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="won"
-            checked={formData.won}
-            onChange={handleChange}
-          />
-          Won Match?
-        </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="won"
+                checked={formData.won}
+                onChange={handleChange}
+              />
+              Won Match?
+            </label>
 
-        {/* Tournament Placement */}
-        <div className="mt-6">
-          <label className="font-semibold mb-3 block text-lg">
-            Tournament Placement
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[
-              { label: "Knocked out of round 1", points: 2 },
-              { label: "Knocked out of round 2", points: 6 },
-              { label: "Lose final round", points: 14 },
-              { label: "Win final round", points: 25 },
-            ].map((option) => {
-              const isSelected = formData.progression_points === option.points;
-              return (
-                <button
-                  key={option.points}
-                  type="button"
-                  onClick={() =>
-                    setFormData({
-                      ...formData,
-                      progression_points: option.points,
-                    })
-                  }
-                  className={`w-full rounded-lg px-4 py-2 text-sm font-medium border transition-all duration-150 ${
-                    isSelected
-                      ? "bg-[var(--accent)] text-white border-transparent hover:bg-[var(--accent-hover)]"
-                      : "bg-[var(--card-bg)] text-[var(--foreground)] border-[var(--border-color)] hover:border-[var(--accent)] hover:bg-[var(--background)]"
-                  }`}>
-                  {option.label}{" "}
-                  <span className="text-muted">({option.points} pts)</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+            {/* Tournament Placement */}
+            <div className="mt-6">
+              <label className="font-semibold mb-3 block text-lg">
+                Tournament Placement
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { label: "Knocked out of round 1", points: 2 },
+                  { label: "Knocked out of round 2", points: 6 },
+                  { label: "Lose final round", points: 14 },
+                  { label: "Win final round", points: 25 },
+                ].map((option) => {
+                  const isSelected =
+                    formData.progression_points === option.points;
+                  return (
+                    <button
+                      key={option.points}
+                      type="button"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          progression_points: option.points,
+                        })
+                      }
+                      className={`w-full rounded-lg px-4 py-2 text-sm font-medium border transition-all duration-150 ${
+                        isSelected
+                          ? "bg-[var(--accent)] text-white border-transparent hover:bg-[var(--accent-hover)]"
+                          : "bg-[var(--card-bg)] text-[var(--foreground)] border-[var(--border-color)] hover:border-[var(--accent)] hover:bg-[var(--background)]"
+                      }`}>
+                      {option.label}{" "}
+                      <span className="text-muted">({option.points} pts)</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-2">
-          <label className="col-span-4 font-semibold">Stats</label>
-          <label className="text-center">Kills</label>
-          <label className="text-center">Assists</label>
-          <label className="text-center">Deaths</label>
-          <label className="text-center">Revives</label>
-          {["kills", "assists", "deaths", "revives"].map((field) => (
-            <input
-              key={field}
-              type="number"
-              name={field}
-              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-              value={formData[field]}
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-2">
+              <label className="col-span-4 font-semibold">Stats</label>
+              <label className="text-center">Kills</label>
+              <label className="text-center">Assists</label>
+              <label className="text-center">Deaths</label>
+              <label className="text-center">Revives</label>
+              {["kills", "assists", "deaths", "revives"].map((field) => (
+                <input
+                  key={field}
+                  type="number"
+                  name={field}
+                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  className="input input-bordered w-full"
+                />
+              ))}
+            </div>
+
+            {/* Damage/Support/Objective */}
+            <div className="grid grid-cols-3 gap-2">
+              <label className="text-center">Damage</label>
+              <label className="text-center">Support</label>
+              <label className="text-center">Objective</label>
+              {["damage", "support", "objective"].map((field) => (
+                <input
+                  key={field}
+                  type="number"
+                  name={field}
+                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  className="input input-bordered w-full"
+                />
+              ))}
+            </div>
+
+            {/* Arena / Map dropdown */}
+            <label className="font-semibold">Arena / Map</label>
+            <select
+              name="arena_id"
+              value={formData.arena_id}
               onChange={handleChange}
               className="input input-bordered w-full"
-            />
-          ))}
+              required>
+              <option value="">Select an arena</option>
+              {arenas.map((arena) => (
+                <option key={arena.id} value={arena.id}>
+                  {arena.arena_name}
+                </option>
+              ))}
+            </select>
+
+            <button type="submit" className="btn btn-primary w-full">
+              Insert Match
+            </button>
+          </form>
+          {message && <p className="mt-4 text-center">{message}</p>}
         </div>
 
-        {/* Damage/Support/Objective */}
-        <div className="grid grid-cols-3 gap-2">
-          <label className="text-center">Damage</label>
-          <label className="text-center">Support</label>
-          <label className="text-center">Objective</label>
-          {["damage", "support", "objective"].map((field) => (
-            <input
-              key={field}
-              type="number"
-              name={field}
-              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-              value={formData[field]}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-            />
-          ))}
+        {/* Right column: Match History */}
+        <div className="flex-1 w-full lg:w-2/3">
+          <MatchHistory />
         </div>
-
-        {/* Arena / Map dropdown */}
-        <label className="font-semibold">Arena / Map</label>
-        <select
-          name="arena_id"
-          value={formData.arena_id}
-          onChange={handleChange}
-          className="input input-bordered w-full"
-          required>
-          <option value="">Select an arena</option>
-          {arenas.map((arena) => (
-            <option key={arena.id} value={arena.id}>
-              {arena.arena_name}
-            </option>
-          ))}
-        </select>
-
-        <button type="submit" className="btn btn-primary w-full">
-          Insert Match
-        </button>
-      </form>
-
-      {message && <p className="mt-4 text-center">{message}</p>}
+      </div>
     </div>
   );
 }
