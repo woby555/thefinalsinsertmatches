@@ -1,46 +1,27 @@
 "use client";
-import { useState, useEffect } from "react";
 
-export default function MatchHistory() {
-  const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        const res = await fetch("/api/match-history");
-        if (!res.ok) throw new Error("Failed to fetch matches");
-        const data = await res.json();
-
-        // Sort by match_date descending (latest first)
-        data.sort((a, b) => new Date(b.match_date) - new Date(a.match_date));
-
-        setMatches(data);
-      } catch (err) {
-        console.error(err);
-        setError("Error loading match history.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMatches();
-  }, []);
-
+export default function MatchHistory({ matches = [], loading, refreshMatches }) {
   if (loading) return <p className="mt-4 text-center">Loading match history...</p>;
-  if (error) return <p className="mt-4 text-center text-red-500">{error}</p>;
 
   const totalMatches = matches.length;
 
   return (
     <div className="card">
-      <h2 className="text-xl font-bold mb-4">World Tour Match History</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">World Tour Match History</h2>
+        <button onClick={refreshMatches} className="btn btn-sm btn-outline">
+          Refresh
+        </button>
+      </div>
 
       <div
         className="overflow-x-auto"
         style={{ maxHeight: "500px", overflowY: "auto" }}
       >
-        <table className="min-w-full border-collapse" style={{ borderColor: "var(--border-color)" }}>
+        <table
+          className="min-w-full border-collapse"
+          style={{ borderColor: "var(--border-color)" }}
+        >
           <thead
             style={{
               backgroundColor: "var(--card-bg)",
@@ -52,6 +33,7 @@ export default function MatchHistory() {
             <tr>
               {[
                 "Match #",
+                "DB ID",
                 "Character",
                 "Loadout",
                 "Weapon",
@@ -78,6 +60,7 @@ export default function MatchHistory() {
               ))}
             </tr>
           </thead>
+
           <tbody>
             {matches.map((m, index) => (
               <tr
@@ -85,8 +68,14 @@ export default function MatchHistory() {
                 style={{ borderBottom: "1px solid var(--border-color)" }}
                 className="hover:bg-[var(--background)]"
               >
-                {/* Reverse Match #: latest match gets highest number */}
-                <td className="px-2 py-1">{totalMatches - index}</td>
+                {/* Custom visible match number */}
+                <td className="px-2 py-1 text-center font-semibold">
+                  {totalMatches - index}
+                </td>
+
+                {/* Actual database ID */}
+                <td className="px-2 py-1 text-center text-muted">{m.id}</td>
+
                 <td className="px-2 py-1">{m.name}</td>
                 <td className="px-2 py-1">{m.loadout_name}</td>
                 <td className="px-2 py-1">{m.primary_weapon || "N/A"}</td>
@@ -98,7 +87,9 @@ export default function MatchHistory() {
                 <td className="px-2 py-1">{m.revives}</td>
                 <td className="px-2 py-1">{`${m.damage_score}/${m.support_score}/${m.objective_score}`}</td>
                 <td className="px-2 py-1">{m.arena_name || "N/A"}</td>
-                <td className="px-2 py-1">{new Date(m.match_date).toLocaleDateString()}</td>
+                <td className="px-2 py-1">
+                  {new Date(m.match_date).toLocaleDateString()}
+                </td>
               </tr>
             ))}
           </tbody>
