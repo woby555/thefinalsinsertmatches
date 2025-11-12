@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import MatchHistory from "../../components/MatchHistory";
+import Link from "next/link";
 
 export default function InsertMatchPage() {
   const [characters, setCharacters] = useState([]);
@@ -141,6 +142,10 @@ export default function InsertMatchPage() {
       <h1 className="text-2xl font-bold mb-6 text-center">
         World Tour Matches
       </h1>
+
+      <Link href="/create-loadout" className="btn block btn-secondary mb-6">
+        Create New Loadout
+      </Link>
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left column: Insert Match Form */}

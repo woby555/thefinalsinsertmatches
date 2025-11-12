@@ -20,6 +20,11 @@ export async function GET() {
 }
 
 export async function POST(req) {
+
+  const localDate = new Date();
+const offsetMs = localDate.getTimezoneOffset() * 60000; // convert min → ms
+const localISOTime = new Date(localDate.getTime() - offsetMs).toISOString().slice(0, 19).replace('T', ' ');
+
   try {
     const body = await req.json();
     const {
