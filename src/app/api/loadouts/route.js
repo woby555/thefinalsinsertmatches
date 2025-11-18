@@ -61,7 +61,7 @@ export async function POST(req) {
     } = body;
 
     // Validate inputs
-    if (!p_character_name || !p_class_name || !p_loadout_name) {
+    if (!p_character_name || !p_class_name) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { "Content-Type": "application/json" } }

@@ -11,10 +11,11 @@ export default function CreateLoadoutPage() {
   const [message, setMessage] = useState("");
   const [editingLoadout, setEditingLoadout] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  
 
   const [formData, setFormData] = useState({
     loadout_name: "",
-    equipments: [{ slot_number: 0, equipment_name: "" }],
+    equipments: Array.from({ length: 8 }, (_, i) => ({ slot_number: i, equipment_name: "" })),
   });
 
   // Fetch characters, equipments, and loadouts
@@ -128,25 +129,33 @@ export default function CreateLoadoutPage() {
     setFormData({ ...formData, equipments: updated });
   };
 
-  const addEquipmentSlot = () => {
-    if (formData.equipments.length < 8) {
-      setFormData({
-        ...formData,
-        equipments: [
-          ...formData.equipments,
-          { slot_number: formData.equipments.length, equipment_name: "" },
-        ],
-      });
+  const copyLoadoutToForm = async (loadout) => {
+    // 1. Find and set character
+    const selectedChar = characters.find(
+      (c) => c.name === loadout.character_name
+    );
+
+    if (selectedChar) {
+      setSelectedCharacter(selectedChar);
+      setSelectedClass(selectedChar.class_name);
+
+      // Trigger equipment fetch for that class
+      await fetchEquipmentsForClass(selectedChar.class_name);
     }
+
+    // 2. Populate form fields
+    setFormData({
+      loadout_name: loadout.loadout_name + " Copy",
+      equipments: Array.from({ length: 8 }, (_, i) => ({
+        slot_number: i,
+        equipment_name: loadout.equipments?.[i]?.equipment_name || "",
+      })),
+    });
+
+    setMessage(`📋 Copied "${loadout.loadout_name}" to editor.`);
   };
 
-  const removeEquipmentSlot = (index) => {
-    const updated = formData.equipments.filter((_, i) => i !== index);
-    setFormData({
-      ...formData,
-      equipments: updated.map((eq, i) => ({ ...eq, slot_number: i })),
-    });
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -156,9 +165,28 @@ export default function CreateLoadoutPage() {
       return;
     }
 
-    if (!formData.loadout_name.trim()) {
-      setMessage("⚠️ Please enter a loadout name.");
-      return;
+    let loadoutName = formData.loadout_name.trim();
+
+    // AUTO-GENERATE A NAME IF BLANK
+    if (!loadoutName) {
+      // Get existing loadouts for this character
+      const characterLoadouts = loadouts.filter(
+        (l) => l.character_name === selectedCharacter.name
+      );
+
+      // Find numbers already used: "Ghost 1", "Ghost 2", ...
+      const usedNumbers = characterLoadouts
+        .map((l) => {
+          const parts = l.loadout_name.split(" ");
+          const n = parseInt(parts[parts.length - 1], 10);
+          return isNaN(n) ? null : n;
+        })
+        .filter((n) => n !== null);
+
+      const nextNumber =
+        usedNumbers.length > 0 ? Math.max(...usedNumbers) + 1 : 1;
+
+      loadoutName = `${selectedCharacter.name} ${nextNumber}`;
     }
 
     setMessage("Submitting...");
@@ -170,18 +198,15 @@ export default function CreateLoadoutPage() {
         body: JSON.stringify({
           p_character_name: selectedCharacter.name,
           p_class_name: selectedClass,
-          p_loadout_name: formData.loadout_name,
+          p_loadout_name: loadoutName,
           p_equipments: formData.equipments,
         }),
       });
 
-      console.log("Response status:", res.status);
-
       const data = await res.json();
+
       if (res.ok) {
-        setMessage(
-          `✅ Loadout "${formData.loadout_name}" created successfully!`
-        );
+        setMessage(`✅ Loadout "${loadoutName}" created successfully!`);
         setFormData({
           loadout_name: "",
           equipments: [{ slot_number: 0, equipment_name: "" }],
@@ -194,6 +219,7 @@ export default function CreateLoadoutPage() {
       setMessage("⚠️ Network or server error");
     }
   };
+
 
   return (
     <div className="max-w-6xl mx-auto mt-10 p-4">
@@ -210,13 +236,15 @@ export default function CreateLoadoutPage() {
         <div className="flex-1 p-6 border rounded-lg shadow bg-[var(--card-bg)]">
           <form onSubmit={handleSubmit} className="space-y-4">
             <select
+              value={selectedCharacter?.name || ""}
               onChange={handleCharacterChange}
               className="select select-bordered w-full"
-              defaultValue=""
-              required>
+              required
+            >
               <option value="" disabled>
                 Select Character
               </option>
+
               {characters.map((c) => (
                 <option key={c.id} value={c.name}>
                   {c.name} ({c.class_name})
@@ -231,7 +259,7 @@ export default function CreateLoadoutPage() {
               value={formData.loadout_name}
               onChange={handleLoadoutNameChange}
               className="input input-bordered w-full"
-              required
+              
             />
 
             <div>
@@ -246,17 +274,16 @@ export default function CreateLoadoutPage() {
               {formData.equipments.map((eq, i) => (
                 <div
                   key={i}
-                  className="flex flex-col sm:flex-row gap-2 items-center mb-3 border-b pb-2">
-                  <span className="text-sm text-gray-500 w-20">
-                    Slot {i + 1}
-                  </span>
+                  className="flex flex-col sm:flex-row gap-2 items-center mb-3 border-b pb-2"
+                >
+                  <span className="text-sm text-gray-500 w-20">Slot {i + 1}</span>
 
                   <select
                     value={eq.equipment_name}
                     onChange={(e) => handleEquipmentChange(i, e.target.value)}
                     className="select select-bordered flex-1"
                     required
-                    disabled={!selectedCharacter} // disable if no character selected
+                    disabled={!selectedCharacter}
                   >
                     <option value="">Select Equipment</option>
 
@@ -281,32 +308,13 @@ export default function CreateLoadoutPage() {
                     )}
 
                     {weaponList.length === 0 && gadgetList.length === 0 && (
-                      <option disabled>
-                        No equipment available for this class
-                      </option>
+                      <option disabled>No equipment available for this class</option>
                     )}
                   </select>
-
-                  {formData.equipments.length > 1 && (
-                    <button
-                      type="button"
-                      className="btn btn-error btn-sm"
-                      onClick={() => removeEquipmentSlot(i)}>
-                      ✕
-                    </button>
-                  )}
                 </div>
               ))}
 
-              {formData.equipments.length < 8 && (
-                <button
-                  type="button"
-                  className="btn btn-outline btn-sm mt-2"
-                  onClick={addEquipmentSlot}
-                  disabled={!selectedCharacter}>
-                  ➕ Add Slot
-                </button>
-              )}
+
             </div>
 
             <button type="submit" className="btn btn-primary w-full mt-6">
@@ -354,6 +362,14 @@ export default function CreateLoadoutPage() {
                       className="btn btn-sm btn-outline">
                       ✏️ Edit
                     </button>
+
+                    <button
+                      onClick={() => copyLoadoutToForm(loadout)}
+                      className="btn btn-sm btn-outline ml-2"
+                    >
+                      📋 Copy
+                    </button>
+
                   </div>
 
                   {loadout.equipments?.length > 0 && (

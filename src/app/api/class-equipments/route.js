@@ -13,6 +13,7 @@ export async function GET(req) {
       );
     }
 
+    // 1. Fetch class-specific equipment
     const cls = await prisma.classes.findUnique({
       where: { class_name },
       include: {
@@ -26,18 +27,40 @@ export async function GET(req) {
       },
     });
 
-    if (!cls)
+    if (!cls) {
       return new Response(JSON.stringify({ error: "Class not found" }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       });
+    }
 
-    const allowedEquipments = cls.class_equipments.map((ce) => ce.equipments);
-
-    return new Response(JSON.stringify(allowedEquipments), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    const classSpecific = await prisma.class_equipments.findMany({
+      where: { class_id: cls.id },
+      include: {
+        equipments: true,
+      },
     });
+
+    // Global equipment = equipment that has no entries in class_equipments at all
+    const globalEquipments = await prisma.equipments.findMany({
+      where: {
+        class_equipments: {
+          none: {},
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        equipment_type: true,
+      },
+    });
+
+    const allowedEquipments = [
+      ...classSpecific.map((ce) => ce.equipments),
+      ...globalEquipments,
+    ];
+
+    return new Response(JSON.stringify(allowedEquipments), { status: 200 });
   } catch (error) {
     console.error("Error fetching class equipments:", error);
     return new Response(JSON.stringify({ error: error.message }), {

@@ -381,7 +381,15 @@ export default function InsertMatchPage() {
             refreshMatches={fetchMatches}
           />
         </div>
+
+
       </div>
+         <div className="text-black mb-6 p-4 rounded-lg shadow bg-yellow-100 border-l-4 border-yellow-500 mx-auto mt-10 max-w-md text-center">
+          <h3 className="text-lg font-semibold">Total Progression Points</h3>
+          <p className="text-xl font-bold mt-2">
+            {matches.reduce((sum, match) => sum + (match.progression_points || 0), 0)}
+          </p>
+        </div>
     </div>
   );
 }
