@@ -381,10 +381,24 @@ export default function CreateLoadoutPage() {
         onSubmit={async (e) => {
           e.preventDefault();
 
+          const payload = {
+            loadout_name: editingLoadout.loadout_name,
+            equipments: editingLoadout.equipments.map((eq, index) => {
+              const matched =
+                weaponList.find((w) => w.name === eq.equipment_name) ||
+                gadgetList.find((g) => g.name === eq.equipment_name);
+
+              return {
+                slot_number: index,
+                equipment_id: matched?.id,
+              };
+            }),
+          };
+
           const res = await fetch(`/api/loadouts/${editingLoadout.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editingLoadout),
+            body: JSON.stringify(payload),
           });
 
           if (res.ok) {
@@ -397,7 +411,7 @@ export default function CreateLoadoutPage() {
             setMessage(`❌ Error: ${data.error}`);
           }
         }}
-        className="space-y-4 max-h-[80vh] overflow-y-auto"
+        className="space-y-4"
       >
         {/* Loadout Name */}
         <label className="form-control w-full">
