@@ -105,13 +105,9 @@ http://localhost:3000
 
 ---
 
-## 🗺️ Planned Enhancements
-- Graphs for performance over time
-- Streak and winrate tracking
-- Opponent/team logging
-- Loadout comparisons
-- Export/import match data
-- Full CRUD for equipment tables
+## 🗺️ Extending beyond
+-  Connected database to Power BI to display item usage, class winrates, and performance indicators:
+-  ![Power BI](pbi.jpg)
 
 ---
 
