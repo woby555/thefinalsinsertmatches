@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Match Tracking System
 
-## Getting Started
+A private, local-only web application for tracking in-game matches, characters, loadouts, progression points, and overall performance. Built with **Next.js**, **Prisma**, and **PostgreSQL**, this project provides fast data entry tools and detailed history views to help analyze gameplay progression.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Features
+
+### **Match Entry Form**
+- Select **Character → Specialization → Loadout** with dynamic filtering.
+- Choose an **Arena**.
+- Log match outcomes (Win / Loss / Draw).
+- Automatically calculate and store **progression points**.
+- UI optimized for fast repeat-entry.
+
+### **Match History Dashboard**
+- Displays all recorded matches in a clean, scrollable table.
+- Shows character, specialization, loadout, arena, and progression points.
+- Editing mode for adjusting historical data.
+- Real-time visual updates without page reload.
+
+### **Loadout Management**
+- Create and edit loadouts tied to specializations.
+- Assign equipment sets and loadout names.
+- Used seamlessly in the match entry workflow.
+
+### **Progression Summary**
+- Quick card showing total progression points.
+- Can be expanded later to include streaks, averages, and graphs.
+
+### **Local and Private by Design**
+- Runs on localhost only.
+- PostgreSQL configured to accept local connections only.
+- No public exposure or external API calls.
+
+---
+
+## 🏗️ Tech Stack
+
+### **Frontend**
+- Next.js (App Router)
+- React
+- TailwindCSS + DaisyUI
+
+### **Backend**
+- Next.js API Routes
+- Prisma ORM
+- Local PostgreSQL server
+
+### **Database**
+Schema includes:
+- Characters
+- Specializations
+- Loadouts
+- Arenas
+- Matches
+- Equipment (optional or planned)
+
+---
+
+## 📦 Installation
+
+### **1. Clone the Repository**
+```
+git clone <repo-url>
+cd <project-folder>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### **2. Install Dependencies**
+```
+npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### **3. Configure Environment Variables**
+Create a `.env` file:
+```
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### **4. Generate Prisma Client**
+```
+npx prisma generate
+```
 
-## Learn More
+### **5. Start the Local Database**
+Make sure PostgreSQL is running on your system.
 
-To learn more about Next.js, take a look at the following resources:
+### **6. Run the Development Server**
+```
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Visit:
+```
+http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🧪 Development Workflow
+1. Start PostgreSQL (via service or manual script).
+2. Run the Next.js dev server.
+3. Use the Insert Match page to log gameplay sessions.
+4. View logs and progression on the Dashboard page.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🗺️ Planned Enhancements
+- Graphs for performance over time
+- Streak and winrate tracking
+- Opponent/team logging
+- Loadout comparisons
+- Export/import match data
+- Full CRUD for equipment tables
+
+---
+
+## 📄 License
+This project is for personal use and demonstration. Not intended for production deployment.
+
+---
+
+## 🙌 Acknowledgments
+Built as a personal utility tool to track in-game performance and progression more accurately.
+
