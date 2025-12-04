@@ -137,6 +137,28 @@ export default function InsertMatchPage() {
     }
   };
 
+  const handleClearAll = () => {
+  setSelectedCharacter(null);
+  setSelectedLoadout(null);
+  setSelectedSpecialization(null);
+
+  setFormData({
+    primary_weapon_name: "",
+    sub_gamemode_name: "",
+    specialization_name: "",
+    won: false,
+    progression_points: 0,
+    kills: 0,
+    assists: 0,
+    deaths: 0,
+    revives: 0,
+    damage: 0,
+    support: 0,
+    objective: 0,
+    arena_id: "",
+  });
+};
+
   return (
     <div className="max-w-7xl mx-auto mt-10 p-4">
       <h1 className="text-2xl font-bold mb-6 text-center">
@@ -150,6 +172,14 @@ export default function InsertMatchPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left column: Insert Match Form */}
         <div className="w-full lg:w-1/3 p-6 border rounded-lg shadow bg-[var(--card-bg)]">
+
+                    <button
+              type="button"
+              onClick={handleClearAll}
+              className="btn btn-primary btn-outline w-full"
+            >
+              Clear All Selections
+            </button>
           <h2 className="text-xl font-semibold mb-4">Insert Match</h2>
           <form onSubmit={handleSubmit} className="space-y-3">
             {/* Character */}
@@ -366,6 +396,9 @@ export default function InsertMatchPage() {
               ))}
             </select>
 
+
+
+
             <button type="submit" className="btn btn-primary w-full">
               Insert Match
             </button>
@@ -387,7 +420,7 @@ export default function InsertMatchPage() {
          <div className="text-black mb-6 p-4 rounded-lg shadow bg-yellow-100 border-l-4 border-yellow-500 mx-auto mt-10 max-w-md text-center">
           <h3 className="text-lg font-semibold">Total Progression Points</h3>
           <p className="text-xl font-bold mt-2">
-            {matches.reduce((sum, match) => sum + (match.progression_points || 0), 0)}
+            {matches.reduce((sum, match) => sum + (match.progression_points || 0), 0)} / 2400
           </p>
         </div>
     </div>

@@ -97,6 +97,9 @@ export default function Home() {
           />
           Go to nextjs.org →
         </a>
+
+        <a href="/matches/insert-match">a</a>
+
       </footer>
     </div>
   );
